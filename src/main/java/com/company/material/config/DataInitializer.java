@@ -1,9 +1,13 @@
 package com.company.material.config;
 
+import com.company.material.entity.InventoryLedger;
+import com.company.material.entity.Location;
 import com.company.material.entity.Material;
 import com.company.material.entity.Supplier;
 import com.company.material.entity.User;
 import com.company.material.entity.Warehouse;
+import com.company.material.repository.InventoryLedgerRepository;
+import com.company.material.repository.LocationRepository;
 import com.company.material.repository.MaterialRepository;
 import com.company.material.repository.SupplierRepository;
 import com.company.material.repository.UserRepository;
@@ -23,6 +27,8 @@ public class DataInitializer implements CommandLineRunner {
     private final MaterialRepository materialRepository;
     private final WarehouseRepository warehouseRepository;
     private final SupplierRepository supplierRepository;
+    private final LocationRepository locationRepository;
+    private final InventoryLedgerRepository inventoryLedgerRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -52,6 +58,103 @@ public class DataInitializer implements CommandLineRunner {
             createMaterial("MAT0003", "三相异步电机", "电气设备", "台", "Y2-132M-4 7.5kW", new BigDecimal("1850.00"), 10);
             createMaterial("MAT0004", "液压油", "辅料", "桶", "L-HM46 200L", new BigDecimal("980.00"), 30);
             createMaterial("MAT0005", "劳保手套", "低值易耗", "副", "丁腈防滑", new BigDecimal("8.50"), 500);
+        }
+
+        if (locationRepository.count() == 0) {
+            Warehouse wh001 = warehouseRepository.findByWarehouseCode("WH001").orElse(null);
+            Warehouse wh002 = warehouseRepository.findByWarehouseCode("WH002").orElse(null);
+            Warehouse wh003 = warehouseRepository.findByWarehouseCode("WH003").orElse(null);
+
+            if (wh001 != null) {
+                for (String zone : new String[]{"A", "B"}) {
+                    for (int row = 1; row <= 2; row++) {
+                        for (int shelf = 1; shelf <= 2; shelf++) {
+                            for (int pos = 1; pos <= 3; pos++) {
+                                createLocation(
+                                    String.format("WH001-%s-%02d-%02d-%02d", zone, row, shelf, pos),
+                                    wh001.getId(), zone,
+                                    String.format("%02d", row),
+                                    String.format("%02d", shelf),
+                                    String.format("%02d", pos)
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (wh002 != null) {
+                for (String zone : new String[]{"A"}) {
+                    for (int row = 1; row <= 2; row++) {
+                        for (int shelf = 1; shelf <= 2; shelf++) {
+                            for (int pos = 1; pos <= 2; pos++) {
+                                createLocation(
+                                    String.format("WH002-%s-%02d-%02d-%02d", zone, row, shelf, pos),
+                                    wh002.getId(), zone,
+                                    String.format("%02d", row),
+                                    String.format("%02d", shelf),
+                                    String.format("%02d", pos)
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (wh003 != null) {
+                for (String zone : new String[]{"A"}) {
+                    for (int row = 1; row <= 1; row++) {
+                        for (int shelf = 1; shelf <= 2; shelf++) {
+                            for (int pos = 1; pos <= 2; pos++) {
+                                createLocation(
+                                    String.format("WH003-%s-%02d-%02d-%02d", zone, row, shelf, pos),
+                                    wh003.getId(), zone,
+                                    String.format("%02d", row),
+                                    String.format("%02d", shelf),
+                                    String.format("%02d", pos)
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (inventoryLedgerRepository.count() == 0) {
+            Material mat1 = materialRepository.findByMaterialCode("MAT0001").orElse(null);
+            Material mat2 = materialRepository.findByMaterialCode("MAT0002").orElse(null);
+            Material mat3 = materialRepository.findByMaterialCode("MAT0003").orElse(null);
+            Material mat4 = materialRepository.findByMaterialCode("MAT0004").orElse(null);
+            Material mat5 = materialRepository.findByMaterialCode("MAT0005").orElse(null);
+
+            Warehouse wh001 = warehouseRepository.findByWarehouseCode("WH001").orElse(null);
+            Warehouse wh003 = warehouseRepository.findByWarehouseCode("WH003").orElse(null);
+
+            Location loc1 = locationRepository.findByLocationCode("WH001-A-01-01-01").orElse(null);
+            Location loc2 = locationRepository.findByLocationCode("WH001-A-01-01-02").orElse(null);
+            Location loc3 = locationRepository.findByLocationCode("WH001-A-01-02-01").orElse(null);
+            Location loc4 = locationRepository.findByLocationCode("WH001-B-01-01-01").orElse(null);
+            Location loc5 = locationRepository.findByLocationCode("WH003-A-01-01-01").orElse(null);
+            Location loc6 = locationRepository.findByLocationCode("WH003-A-01-01-02").orElse(null);
+
+            if (mat1 != null && wh001 != null && loc1 != null) {
+                createInventoryLedger(mat1.getId(), wh001.getId(), loc1.getId(), new BigDecimal("100"));
+            }
+            if (mat2 != null && wh001 != null && loc2 != null) {
+                createInventoryLedger(mat2.getId(), wh001.getId(), loc2.getId(), new BigDecimal("500"));
+            }
+            if (mat4 != null && wh001 != null && loc3 != null) {
+                createInventoryLedger(mat4.getId(), wh001.getId(), loc3.getId(), new BigDecimal("30"));
+            }
+            if (mat5 != null && wh001 != null && loc4 != null) {
+                createInventoryLedger(mat5.getId(), wh001.getId(), loc4.getId(), new BigDecimal("800"));
+            }
+            if (mat3 != null && wh003 != null && loc5 != null) {
+                createInventoryLedger(mat3.getId(), wh003.getId(), loc5.getId(), new BigDecimal("5"));
+            }
+            if (mat2 != null && wh003 != null && loc6 != null) {
+                createInventoryLedger(mat2.getId(), wh003.getId(), loc6.getId(), new BigDecimal("50"));
+            }
         }
     }
 
@@ -96,5 +199,26 @@ public class DataInitializer implements CommandLineRunner {
         m.setReferencePrice(price);
         m.setSafetyStock(safety);
         materialRepository.save(m);
+    }
+
+    private void createLocation(String locationCode, Long warehouseId, String zone, String row, String shelf, String position) {
+        Location loc = new Location();
+        loc.setLocationCode(locationCode);
+        loc.setWarehouseId(warehouseId);
+        loc.setZone(zone);
+        loc.setRow(row);
+        loc.setShelf(shelf);
+        loc.setPosition(position);
+        loc.setEnabled("是");
+        locationRepository.save(loc);
+    }
+
+    private void createInventoryLedger(Long materialId, Long warehouseId, Long locationId, BigDecimal quantity) {
+        InventoryLedger ledger = new InventoryLedger();
+        ledger.setMaterialId(materialId);
+        ledger.setWarehouseId(warehouseId);
+        ledger.setLocationId(locationId);
+        ledger.setQuantity(quantity);
+        inventoryLedgerRepository.save(ledger);
     }
 }
